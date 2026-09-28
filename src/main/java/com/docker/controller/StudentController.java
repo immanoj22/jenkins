@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class StudentController {
-    
+
     @Autowired
     StudentService studentService;
     @GetMapping
@@ -21,5 +21,10 @@ public class StudentController {
     @GetMapping("/load")
     public ResponseEntity loadStudent(){
         return new ResponseEntity(studentService.loadallStudent(), HttpStatus.OK);
+    }
+
+    @GetMapping("/m")
+    public ResponseEntity loadm(){
+        return new ResponseEntity("amnoj", HttpStatus.OK);
     }
 }
