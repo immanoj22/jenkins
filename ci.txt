@@ -1,0 +1,88 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER = 'manojraj205'
+        IMAGE_NAME     = 'webappmanojjenkins'
+        DOCKER_TAG     = 'latest'
+    }
+
+    tools {
+        maven 'maveen'
+    }
+
+    stages {
+        stage('git clone') {
+            steps {
+                echo 'git clone started'
+                git branch: 'main', url: 'https://github.com/immanoj22/jenkins.git'
+                echo 'git clone finished'
+            }
+        }
+
+        stage('maven build') {
+            steps {
+                echo 'maven build started'
+                sh 'mvn clean package'
+                echo 'maven build finished'
+            }
+        }
+
+        stage('docker image build') {
+            steps {
+                echo 'docker image build started'
+                sh 'docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${DOCKER_TAG} .'
+                echo 'docker image build finished'
+            }
+        }
+
+        stage('docker image push') {
+            steps {
+                echo 'docker image push started'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                                                  usernameVariable: 'DH_USER',
+                                                  passwordVariable: 'DH_PASS')]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${DOCKER_TAG}
+                    '''
+                }
+                echo 'docker image push finished'
+            }
+        }
+
+        stage('trigger cd') {
+            steps {
+                echo 'triggered cd'
+                build job: 'cd pipeline', wait: true
+            }
+        }
+    }   // <-- stages closes here, after ALL stages
+
+    post {
+        success {
+            emailext(
+                from: 's.manojraj193@gmail.com',
+                to: 's.manojraj193@gmail.com',
+                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Build succeeded.
+
+Job: ${env.JOB_NAME}
+Build number: ${env.BUILD_NUMBER}
+Details: ${env.BUILD_URL}"""
+            )
+        }
+        failure {
+            emailext(
+                from: 's.manojraj193@gmail.com',
+                to: 's.manojraj193@gmail.com',
+                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Build failed.
+
+Job: ${env.JOB_NAME}
+Build number: ${env.BUILD_NUMBER}
+Check the console output: ${env.BUILD_URL}console"""
+            )
+        }
+    }
+}
