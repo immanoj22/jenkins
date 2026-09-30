@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk
-ADD target/docker-0.0.1-SNAPSHOT.jar docker-0.0.1-SNAPSHOT.jar
-ENTRYPOINT ["java","-jar","/docker-0.0.1-SNAPSHOT.jar"]
+FROM eclipse-temurin:21-jre
+COPY target/docker-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 5000
+ENTRYPOINT ["java","-jar","/app.jar"]
