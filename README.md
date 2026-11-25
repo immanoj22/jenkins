@@ -26,6 +26,19 @@ It sends a success or failure email at the end.
 
 `deployment.yaml` defines a Deployment with 2 replicas of the pushed image on port 5000, plus a LoadBalancer Service on port 80. My comment in the pipeline calls the target an EKS cluster, and I have not included cluster setup here.
 
+## Pipeline flow
+
+```mermaid
+flowchart LR
+    G[GitHub repo] --> CI[CI job: mvn clean package]
+    CI --> D[Build Docker image]
+    D --> H[Push to Docker Hub]
+    H --> CD[CD job]
+    CD -->|kubectl apply -f deployment.yaml| K[Kubernetes: 2 replicas + LoadBalancer]
+    CI -.email.-> M[Success / failure mail]
+    CD -.email.-> M
+```
+
 ## Running it locally
 ```
 ./mvnw clean package
