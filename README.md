@@ -50,3 +50,5 @@ Then open http://localhost:5000. Or build the image with `docker build -t webapp
 - The Jenkins jobs expect a Maven tool named `maveen`, the Docker Hub credential above and the email plugin, all configured in Jenkins.
 - `Docker-compose.yml` maps port 8080 while the app and Dockerfile use 5000, so the compose file needs that port fixed before it works as is. Set your own database password there.
 - It is a learning exercise, not a finished deployment.
+
+Set `POSTGRES_PASSWORD` in your environment before running Docker Compose.
